@@ -1,16 +1,40 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { originalUrl } = body
+  const { longUrl, shortUrl } = body
 
-  const shortCode = generateShortCode()
+  if (!longUrl || !shortUrl) {
+    return NextResponse.json(
+      { error: 'longUrl e shortUrl são obrigatórias' },
+      { status: 422 }
+    )
+  }
 
-  // Salvar no banco (ou localmente por enquanto)
+  const { error } = await supabase.from('shortened').insert({
+    longUrl,
+    shortUrl,
+    clicks: 0,
+  })
 
-  return NextResponse.json({ shortUrl: `https://teudominio.com/${shortCode}` })
+  if (error) {
+    console.error('Erro ao encurtar link:', error.message)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  console.log('Link encurtado com sucesso')
+  return NextResponse.json({ message: 'Link encurtado com sucesso' }, { status: 201 })
+
 }
 
-function generateShortCode(): string {
-  return Math.random().toString(36).substring(2, 8)
+export async function GET() {
+  const { data, error } = await supabase.from('shortened').select('*')
+
+  if (error) {
+    console.error('Erro ao buscar links encurtados:', error.message)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  return NextResponse.json(data, { status: 200 })
 }
