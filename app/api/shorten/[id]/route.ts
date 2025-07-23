@@ -2,24 +2,33 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
 // GET /api/shorten/:shortUrl
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   const shortUrl = params.id
 
   const { data, error } = await supabase
-    .from('shortened')
+    .from('shortener')
     .select('*')
     .eq('shortUrl', shortUrl)
     .single()
 
   if (error) {
-    return NextResponse.json({ message: 'O link encurtado não foi encontrado' }, { status: 422 })
+    return NextResponse.json(
+      { message: 'O link encurtado não foi encontrado' },
+      { status: 422 }
+    )
   }
 
   return NextResponse.json(data, { status: 200 })
 }
 
 // PATCH /api/shorten/:id
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   const id = params.id
   const { longUrl, shortUrl } = await req.json()
 
@@ -27,30 +36,45 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   console.log(longUrl, shortUrl)
 
   const { data, error: updateError } = await supabase
-    .from('shortened')
+    .from('shortener')
     .update({ longUrl, shortUrl })
     .eq('id', id)
     .select()
 
   if (updateError) {
-    return NextResponse.json({ message: 'Erro ao atualizar o shortUrl' }, { status: 500 })
+    return NextResponse.json(
+      { message: 'Erro ao atualizar o shortUrl' },
+      { status: 500 }
+    )
   }
 
-  return NextResponse.json({ message: 'URL atualizada com sucesso', data }, { status: 200 })
+  return NextResponse.json(
+    { message: 'URL atualizada com sucesso', data },
+    { status: 200 }
+  )
 }
 
 // DELETE /api/shorten/:id
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   const id = params.id
 
   const { error: deleteError } = await supabase
-    .from('shortened')
+    .from('shortener')
     .delete()
     .eq('id', id)
 
   if (deleteError) {
-    return NextResponse.json({ message: 'Erro ao excluir o shortUrl' }, { status: 500 })
+    return NextResponse.json(
+      { message: 'Erro ao excluir o shortUrl' },
+      { status: 500 }
+    )
   }
 
-  return NextResponse.json({ message: 'URL excluída com sucesso' }, { status: 200 })
+  return NextResponse.json(
+    { message: 'URL excluída com sucesso' },
+    { status: 200 }
+  )
 }

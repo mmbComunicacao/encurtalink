@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { NextRequest, NextResponse } from 'next/server'
+import { supabase } from '@/lib/supabase'
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
@@ -12,10 +12,10 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const { error } = await supabase.from('shortened').insert({
+  const { error } = await supabase.from('shortener').insert({
     longUrl,
     shortUrl,
-    clicks: 0,
+    clicks: 0
   })
 
   if (error) {
@@ -24,12 +24,14 @@ export async function POST(req: NextRequest) {
   }
 
   console.log('Link encurtado com sucesso')
-  return NextResponse.json({ message: 'Link encurtado com sucesso' }, { status: 201 })
-
+  return NextResponse.json(
+    { message: 'Link encurtado com sucesso' },
+    { status: 201 }
+  )
 }
 
 export async function GET() {
-  const { data, error } = await supabase.from('shortened').select('*')
+  const { data, error } = await supabase.from('shortener').select('*')
 
   if (error) {
     console.error('Erro ao buscar links encurtados:', error.message)
